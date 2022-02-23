@@ -19,14 +19,15 @@ const resolvers = {
   },
 
   Mutation: {
-    createUser: async (parent, { username, email, password }) => {
+    addUser: async (parent, { username, email, password }) => {
       const user = await User.create({ username, email, password });
       const token = signToken(user);
       return { token, user };
     },
-    login: async (parent, { email, password, username }) => {
-      const user = await User.findOne({ $or: [{ username: body.username }, { email: body.email }] });
 
+    login: async (parent, { email, password, username }) => {
+      console.log('login', username, email, password);
+      const user = await User.findOne({ $or: [{ username: username }, { email: email }] });
       if (!user) {
         throw new AuthenticationError('No user found with this email address or username');
       }
@@ -41,19 +42,31 @@ const resolvers = {
 
       return { token, user };
     },
-    saveBook: async (parent, { savedBook }, context) => {
+    saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
+      console.log('here??????????????')
       if (context.user) {
+        const book = {
+          authors,
+          description,
+          bookId,
+          image,
+          link,
+          title
+        }
+        console.log('book??', book)
         const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $addToSet: { savedBooks: body } },
+          { $addToSet: { savedBooks: book } },
           { new: true, runValidators: true }
         );
+
+        console.log('updatedUser', updatedUser)
 
         return updatedUser;
       }
       throw new AuthenticationError('You need to be logged in!');
     },
-    deleteBook: async (parent, { bookId }, context) => {
+    removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
         const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
