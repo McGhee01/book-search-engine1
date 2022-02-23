@@ -26,7 +26,6 @@ const resolvers = {
     },
 
     login: async (parent, { email, password, username }) => {
-      console.log('login', username, email, password);
       const user = await User.findOne({ $or: [{ username: username }, { email: email }] });
       if (!user) {
         throw new AuthenticationError('No user found with this email address or username');
@@ -43,7 +42,6 @@ const resolvers = {
       return { token, user };
     },
     saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
-      console.log('here??????????????')
       if (context.user) {
         const book = {
           authors,
@@ -53,14 +51,12 @@ const resolvers = {
           link,
           title
         }
-        console.log('book??', book)
         const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
           { $addToSet: { savedBooks: book } },
           { new: true, runValidators: true }
         );
 
-        console.log('updatedUser', updatedUser)
 
         return updatedUser;
       }
