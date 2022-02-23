@@ -56,11 +56,11 @@ const SearchBooks = () => {
     }
   };
 
+
+
   const [saveBook, { error }] = useMutation(SAVE_BOOK, {
     update(cache, { data: { saveBook } }) {
       try {
-        // const { thoughts } = cache.readQuery({ query: QUERY_THOUGHTS });
-        // update me object's cache
         const { me } = cache.readQuery({ query: GET_ME });
         cache.writeQuery({
           query: GET_ME,
@@ -80,7 +80,6 @@ const SearchBooks = () => {
 
     // find the book in `searchedBooks` state by the matching id
     const { authors, description, image, link, title } = searchedBooks.find((book) => book.bookId === bookId);
-    console.log('Saving book', authors, title)
 
     // get token
     const token = Auth.loggedIn() ? Auth.getToken() : null;
@@ -91,27 +90,23 @@ const SearchBooks = () => {
 
     try {
 
-      // const response = await saveBook(bookToSave, token);
       const { data } = await saveBook({
         variables: {
           authors,
-          description,
+          description: description || '',
           bookId,
-          image,
-          link,
+          image: image || '',
+          link: link || '',
           title
         },
       });
-      console.log('data from saving book', data);
 
-      // if (!response.ok) {
-      //   throw new Error('something went wrong!');
-      // }
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookId]);
     } catch (err) {
       console.error(err);
+      console.error(err.message);
     }
   };
 
